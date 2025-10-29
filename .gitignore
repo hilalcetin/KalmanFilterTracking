@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# VSCode settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Output videos
+*.mp4
+*.avi
+
+# GOT-10k dataset
+val/
+
+# Logs
+*.log
