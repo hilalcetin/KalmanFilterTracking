@@ -24,3 +24,6 @@ val/
 
 # Logs
 *.log
+
+# JetBrains IDE
+.idea/
