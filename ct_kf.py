@@ -38,8 +38,8 @@ class CTKalmanFilter:
             vy_new = vy
         else:
             # Coordinated turn motion
-            x_new = x + (vx * np.sin(omega*dt) + vy * (1 - np.cos(omega*dt))) / omega
-            y_new = y + (vy * np.sin(omega*dt) - vx * (1 - np.cos(omega*dt))) / omega
+            x_new = x + (vx * np.sin(omega*dt) - vy * (1 - np.cos(omega*dt))) / omega
+            y_new = y + (vy * np.sin(omega*dt) + vx * (1 - np.cos(omega*dt))) / omega
             vx_new = vx * np.cos(omega*dt) - vy * np.sin(omega*dt)
             vy_new = vx * np.sin(omega*dt) + vy * np.cos(omega*dt)
 
@@ -56,13 +56,13 @@ class CTKalmanFilter:
 
             # ∂x/∂vx, ∂x/∂vy, ∂x/∂ω
             F[0,2] = sin_ωdt / omega
-            F[0,3] = (1 - cos_ωdt) / omega
-            F[0,4] = (dt*(vx*cos_ωdt - vy*sin_ωdt) - (vx*sin_ωdt + vy*(1 - cos_ωdt))/omega) / omega
+            F[0,3] = -(1 - cos_ωdt) / omega
+            F[0,4] = (dt*(vx*cos_ωdt - vy*sin_ωdt) - (vx*sin_ωdt - vy*(1 - cos_ωdt))/omega) / omega
 
             # ∂y/∂vx, ∂y/∂vy, ∂y/∂ω
-            F[1,2] = -(1 - cos_ωdt) / omega
+            F[1,2] = (1 - cos_ωdt) / omega
             F[1,3] = sin_ωdt / omega
-            F[1,4] = (dt*(vx*sin_ωdt + vy*cos_ωdt) - (vy*sin_ωdt - vx*(1 - cos_ωdt))/omega) / omega
+            F[1,4] = (dt*(vx*sin_ωdt + vy*cos_ωdt) - (vy*sin_ωdt + vx*(1 - cos_ωdt))/omega) / omega
 
             # ∂vx/∂vx, ∂vx/∂vy, ∂vx/∂ω
             F[2,2] = cos_ωdt

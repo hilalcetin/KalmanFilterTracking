@@ -22,8 +22,12 @@ def run_sequence(seq_folder, out_video="tracking_output.mp4", fps=20.0):
     dt, q, r = 1.0, 0.1, 5.0
     cv = CVKalmanFilter(dt, q, r)
     ca = CAKalmanFilter(dt, q, r)
-    ct = CTKalmanFilter(dt, q, r)
+    ct = CTKalmanFilter(dt, q_pos=q, q_vel=q, r=r)
     models = [cv, ca, ct]
+
+    # Karşılaştırma için IMM'den bağımsız tek-model filtreler
+    cv_alone = CVKalmanFilter(dt, q, r)
+    ca_alone = CAKalmanFilter(dt, q, r)
 
     PI = np.array([[0.90, 0.05, 0.05],
                    [0.05, 0.90, 0.05],
@@ -33,7 +37,7 @@ def run_sequence(seq_folder, out_video="tracking_output.mp4", fps=20.0):
 
     # İlk ölçümle başlat
     cx0, cy0 = centers[0]
-    for m in models:
+    for m in models + [cv_alone, ca_alone]:
         m.x[:2] = np.array([cx0, cy0], dtype=float)
 
     # Video writer
@@ -64,8 +68,8 @@ def run_sequence(seq_folder, out_video="tracking_output.mp4", fps=20.0):
             continue
 
         # Tek tek modeller tahmini
-        est_cv = cv.step(z)
-        est_ca = ca.step(z)
+        est_cv = cv_alone.step(z)
+        est_ca = ca_alone.step(z)
         est_imm, mu = imm.step(z)
 
         traj_est_cv.append(est_cv.copy())
@@ -130,7 +134,7 @@ def run_sequence(seq_folder, out_video="tracking_output.mp4", fps=20.0):
     plt.plot(time, rms_ca, label="CA")
     plt.plot(time, rms_imm, label="IMM (CV+CA+CT)")
     plt.xlabel("Frame")
-    plt.ylabel("RMS Rate Error (m/s)")
+    plt.ylabel("RMS Rate Error (px/frame)")
     plt.title("RMS Rate Error vs Time")
     plt.grid(True)
     plt.legend()

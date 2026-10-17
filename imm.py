@@ -146,20 +146,19 @@ class IMM:
     # 4. Update
     # -------------------
     def update(self, z):
+        z = np.asarray(z, dtype=float).reshape(-1)
         likelihoods = []
         for j, model in enumerate(self.models):
-            model.update(z)
-
-            if hasattr(model, "likelihood"):  # filter içinde varsa
-                like = model.likelihood
-            else:  # fallback: Gaussian hesapla
-                S = model.H @ model.P @ model.H.T + model.R
-                y = z - model.H @ model.x
-                try:
-                    like = np.exp(-0.5 * y.T @ np.linalg.inv(S) @ y) / np.sqrt(np.linalg.det(2*np.pi*S))
-                except np.linalg.LinAlgError:
-                    like = 1e-12
+            # olabilirlik, update'ten ÖNCEKİ inovasyonla hesaplanmalı
+            S = model.H @ model.P @ model.H.T + model.R
+            y = z - model.H @ model.x
+            try:
+                like = np.exp(-0.5 * y.T @ np.linalg.solve(S, y)) / np.sqrt(np.linalg.det(2*np.pi*S))
+            except np.linalg.LinAlgError:
+                like = 1e-12
             likelihoods.append(float(like))
+
+            model.update(z)
 
         self.likelihood = np.array(likelihoods)
 
